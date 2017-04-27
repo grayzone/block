@@ -1,0 +1,33 @@
+{
+  "name": "block",
+  "version": "1.0.0",
+  "description": "A block game",
+  "main": "block.js",
+  "scripts": {
+    "build": "webpack -d -w -p --progress --colors",
+    "start": "bee run",
+    "init": "go get -u -v github.com/golang/dep/... && dep init && yarn install",
+    "update": "go get -u -v github.com/golang/dep/... && dep ensure -update -v && yarn upgrade",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "https://github.com/grayzone/block",
+  "author": "grayzone <grayzone137@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-import": "^1.1.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "css-loader": "^0.28.0",
+    "jquery": "^3.2.1",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.3",
+    "postcss-loader": "^1.3.3",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "style-loader": "^0.16.1",
+    "webpack": "^2.4.1"
+  }
+}
