@@ -1,13 +1,13 @@
 import React from "react";
 import $ from "jquery";
-import { Layer, Rect, Stage} from "react-konva";
+import { Layer, Rect, Stage } from "react-konva";
 
 class Block extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      shadowBlur: 5,
+      shadowBlur: 5
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -15,7 +15,7 @@ class Block extends React.Component {
   handleClick = e => {
     console.log("click the block,", this.props);
     this.setState({
-      shadowBlur: 0,
+      shadowBlur: 0
     });
     console.log(
       "the block state is:",
@@ -54,10 +54,9 @@ class Box extends React.Component {
     const colors = ["white", "red", "blue", "yellow", "green", "purple"];
     var sizeX = width + 2;
     var sizeY = height + 2;
-    var index = 0;
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
-        let colorID = data[index];
+        let colorID = data[i][j];
         boxArray.push(
           <Block
             x={i * sizeX}
@@ -68,7 +67,6 @@ class Box extends React.Component {
             onChange={this.handleBlockChange}
           />
         );
-        index++;
       }
     }
     return (
@@ -102,26 +100,42 @@ export default class BlockBox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: this.initData()
+      data: []
     };
   }
-
-  initData = () => {
-    var result = [];
-    for (let i = 0; i < 100; i++) {
-      var x = Math.floor(Math.random() * 5 + 1);
-      result.push(x);
-    }
-    console.log("init the data:", result);
-    return result;
+  getSeedData = () => {
+    var url = "/new";
+    $.ajax({
+      url: url,
+      dataType: "json",
+      type: "GET",
+      cache: false,
+      async: false,
+      success: data => {
+        console.log("seed data:", data);
+        this.setState({ data });
+      },
+      error: (xhr, status, err) => {
+        console.error(url, status, err.toString());
+      }
+    });
   };
 
   handleNewButton = () => {
     console.log("handle new button:");
+    this.getSeedData();
+    /*
     this.setState({
       data: this.initData()
     });
+    */
   };
+
+  
+  componentWillMount() {
+    this.getSeedData();
+  }
+  
 
   handleStartButton = data => {
     console.log("handle start button.");
