@@ -88,6 +88,10 @@ func checkNCrossData(x int, y int, input [10][10]int) ([10][10]int, bool) {
 	crossData := foundNCrossData(x, y, input)
 	point := input[x][y]
 
+	if point == 0 {
+		return result, false
+	}
+
 	if (point != crossData[0]) && (point != crossData[1]) && (point != crossData[2]) && (point != crossData[3]) {
 		return result, false
 	}
@@ -107,43 +111,27 @@ func checkNCrossData(x int, y int, input [10][10]int) ([10][10]int, bool) {
 	return result, true
 }
 
+func sumArrayBox(a, b [10][10]int) [10][10]int {
+	var result [10][10]int
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			result[i][j] = a[i][j] + b[i][j]
+		}
+	}
+	return result
+}
+
 func AdjoinData(input [10][10]int) [10][10]int {
 	var result [10][10]int
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			point := input[i][j]
-			var x1, x2, y1, y2 int
-
-			if i == 0 {
-				x1 = -1
+			v, bAdjoin := checkNCrossData(i, j, input)
+			if !bAdjoin {
+				continue
 			}
-			if i == 9 {
-				x2 = -1
-			}
-			if j == 0 {
-				y1 = -1
-			}
-			if j == 9 {
-				y2 = -1
-			}
-			if x1 != -1 {
-				x1 = input[i-1][j]
-			}
-			if x2 != -1 {
-				x2 = input[i+1][j]
-			}
-			if y1 != -1 {
-				y1 = input[i][j-1]
-			}
-			if y2 != -1 {
-				y2 = input[i][j+1]
-			}
-
-			fmt.Printf("point:%d, x1:%d, x2:%d, y1:%d, y2:%d\n", point, x1, x2, y1, y2)
-
+			result = sumArrayBox(v, result)
 		}
 	}
-
 	return result
 }
 

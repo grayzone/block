@@ -171,12 +171,12 @@ export default class BlockBox extends React.Component {
     return (
       <div>
         <Row gutter={16}>
-          <Col span={6}>
+          <Col span={5}>
             <Stage width={300} height={300}>
               <Box data={this.state.data} />
             </Stage>
           </Col>
-          <Col span={6}>
+          <Col span={5}>
             <Stage width={300} height={300}>
               <Box data={this.state.result} />
             </Stage>
