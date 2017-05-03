@@ -33,7 +33,7 @@ func (b *BlockBox) Seed() {
 
 func (b *BlockBox) TestData() {
 	b.Data = [10][10]int{
-		{1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+		{1, 2, 3, 4, 5, 1, 2, 3, 4, 5},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{1, 2, 3, 4, 5, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 1, 2, 3, 4, 5},
@@ -54,6 +54,7 @@ func (b *BlockBox) Parse(s string) {
 			a := array[index]
 			num, _ := strconv.Atoi(a)
 			b.Data[i][j] = num
+			index++
 		}
 	}
 }
