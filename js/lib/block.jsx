@@ -1,6 +1,7 @@
 import React from "react";
 import $ from "jquery";
 import { Layer, Rect, Stage } from "react-konva";
+import { Button, Row, Col } from "antd";
 
 class Block extends React.Component {
   constructor(props) {
@@ -27,7 +28,19 @@ class Block extends React.Component {
     );
   };
 
+  componentWillMount() {
+    /*
+    if (this.props.colorID != 0) {
+      this.setState({
+        shadowBlur: 5
+      });
+    }
+    */
+  }
+
   render() {
+    const colors = ["white", "red", "blue", "yellow", "green", "purple"];
+    const colorID = this.props.colorID;
     return (
       <Rect
         x={this.props.x}
@@ -35,7 +48,7 @@ class Block extends React.Component {
         width={this.props.width}
         height={this.props.height}
         shadowBlur={this.state.shadowBlur}
-        fill={this.props.color}
+        fill={colors[colorID]}
         onClick={this.handleClick}
       />
     );
@@ -49,21 +62,21 @@ class Box extends React.Component {
   render() {
     const boxArray = [];
     const data = this.props.data;
-    const width = 50;
-    const height = 50;
-    const colors = ["white", "red", "blue", "yellow", "green", "purple"];
+    const width = 25;
+    const height = 25;
+
     var sizeX = width + 2;
     var sizeY = height + 2;
     for (let i = 0; i < 10; i++) {
-      for (let j = 0; j < 10; j++) {
-        let colorID = data[i][j];
+      for (let j = 10; j > 0; j--) {
+        let colorID = data[i][10 - j];
         boxArray.push(
           <Block
             x={i * sizeX}
             y={j * sizeY}
             width={width}
             height={height}
-            color={colors[colorID]}
+            colorID={colorID}
             onChange={this.handleBlockChange}
           />
         );
@@ -77,34 +90,24 @@ class Box extends React.Component {
   }
 }
 
-class ActionButton extends React.Component {
-  handleNewClick = e => {
-    console.log("a new game.");
-    this.props.onNewClick("this.initData()");
-  };
-  handleStartClick = e => {
-    console.log("start the game.");
-    this.props.onStartClick(e);
-  };
-  render() {
-    return (
-      <div>
-        <button onClick={this.handleNewClick}>New</button>
-        <button onClick={this.handleStartClick}>Start</button>
-      </div>
-    );
-  }
-}
-
 export default class BlockBox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: []
+      data: [],
+      result: []
     };
   }
   getSeedData = () => {
-    var url = "/new";
+    this.getData("new");
+  };
+
+  getTestData = () => {
+    this.getData("test");
+  };
+
+  getData = action => {
+    var url = "/" + action;
     $.ajax({
       url: url,
       dataType: "json",
@@ -113,7 +116,10 @@ export default class BlockBox extends React.Component {
       async: false,
       success: data => {
         console.log("seed data:", data);
-        this.setState({ data });
+        this.setState({
+          data: data,
+          result: data
+        });
       },
       error: (xhr, status, err) => {
         console.error(url, status, err.toString());
@@ -121,39 +127,75 @@ export default class BlockBox extends React.Component {
     });
   };
 
-  handleNewButton = () => {
-    console.log("handle new button:");
-    this.getSeedData();
-    /*
-    this.setState({
-      data: this.initData()
+  dropdata = () => {
+    var url = "/drop";
+    $.ajax({
+      url: url,
+      dataType: "json",
+      type: "POST",
+      cache: false,
+      async: false,
+      data: {
+        data: this.state.data.join()
+      },
+      success: data => {
+        console.log("seed data:", data);
+        this.setState({ result: data });
+      },
+      error: (xhr, status, err) => {
+        console.error(url, status, err.toString());
+      }
     });
-    */
   };
 
-  
-  componentWillMount() {
+  handleNewClick = () => {
+    console.log("handle new button:");
     this.getSeedData();
-  }
-  
+  };
 
-  handleStartButton = data => {
+  handleTestClick = () => {
+    this.getTestData();
+  };
+
+  componentWillMount() {
+    //  this.getSeedData();
+    this.getTestData();
+  }
+
+  handleStartClick = data => {
+    this.dropdata();
     console.log("handle start button.");
-    this.setState({
-      data
-    });
   };
 
   render() {
     return (
       <div>
-        <Stage width={600} height={600}>
-          <Box data={this.state.data} />
-        </Stage>
-        <ActionButton
-          onNewClick={this.handleNewButton}
-          onStartClick={this.handleStartButton}
-        />
+        <Row gutter={16}>
+          <Col span={6}>
+            <Stage width={300} height={300}>
+              <Box data={this.state.data} />
+            </Stage>
+          </Col>
+          <Col span={6}>
+            <Stage width={300} height={300}>
+              <Box data={this.state.result} />
+            </Stage>
+          </Col>
+        </Row>
+
+        <Row gutter={8}>
+          <Col span={2}>
+            <Button type="primary" onClick={this.handleNewClick}>New</Button>
+          </Col>
+          <Col span={2}>
+            <Button type="primary" onClick={this.handleTestClick}>Test</Button>
+          </Col>
+          <Col span={2}>
+            <Button type="primary" onClick={this.handleStartClick}>
+              Start
+            </Button>
+          </Col>
+        </Row>
       </div>
     );
   }
