@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type Point struct {
+	X int
+	Y int
+}
+
 type BlockBox struct {
 	Data [10][10]int
 	Mask [10][10]int
@@ -35,6 +40,7 @@ func (b BlockBox) Print() {
 		}
 		fmt.Println()
 	}
+
 }
 
 func (b *BlockBox) Seed() {
@@ -250,12 +256,50 @@ func (b *BlockBox) checkNCrossData(x, y int) bool {
 func (b *BlockBox) Adjoin() {
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			bAdjoin := b.checkNCrossData(i, j)
-			if !bAdjoin {
-				continue
-			}
-			//p := b.Mask[i][j]
+			b.checkNCrossData(i, j)
 		}
 	}
+}
 
+func (b BlockBox) FoundGroupBlock(index int) []Point {
+	var result []Point
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			if b.Mask[i][j] != index {
+				continue
+			}
+			var p Point
+			p.X = i
+			p.Y = j
+			result = append(result, p)
+		}
+	}
+	return result
+}
+
+func (b BlockBox) RemoveGroupBlock(index int) [10][10]int {
+	var result BlockBox
+	result = b
+	group := b.FoundGroupBlock(index)
+	for i := range group {
+		p := group[i]
+		result.Data[p.X][p.Y] = 0
+	}
+	return result.Data
+}
+
+func (b BlockBox) AutoPlay() {
+	b.Format()
+	b.Adjoin()
+	for b.Flag > 0 {
+		s1 := rand.NewSource(time.Now().UnixNano())
+		r1 := rand.New(s1)
+		index := r1.Intn(b.Flag) + 1
+		fmt.Println("index:", index)
+		b.RemoveGroupBlock(index)
+		b.Format()
+		b.Adjoin()
+
+		b.Print()
+	}
 }
