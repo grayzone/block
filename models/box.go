@@ -10,12 +10,28 @@ import (
 
 type BlockBox struct {
 	Data [10][10]int
+	Mask [10][10]int
+	Flag int
 }
 
 func (b BlockBox) Print() {
+	fmt.Println("-------------Data--------------|--------------Mask------------")
 	for i := 0; i < 10; i++ {
 		for j := 10; j > 0; j-- {
-			fmt.Printf("%d ", b.Data[10-j][10-i-1])
+			if b.Data[10-j][10-i-1] != 0 {
+				fmt.Printf("%02d ", b.Data[10-j][10-i-1])
+			} else {
+				fmt.Printf("   ")
+			}
+
+		}
+		fmt.Print(" | ")
+		for j := 10; j > 0; j-- {
+			if b.Mask[10-j][10-i-1] != 0 {
+				fmt.Printf("%02d ", b.Mask[10-j][10-i-1])
+			} else {
+				fmt.Printf("   ")
+			}
 		}
 		fmt.Println()
 	}
@@ -39,7 +55,7 @@ func (b *BlockBox) TestData() {
 		{0, 0, 0, 0, 0, 1, 2, 3, 4, 5},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{1, 2, 3, 4, 5, 0, 0, 0, 0, 0}}
@@ -105,12 +121,14 @@ func (b *BlockBox) Format() {
 	b.Left()
 }
 
-func (b *BlockBox) Sum(x, y BlockBox) {
+func BlockBoxSum(x, y [10][10]int) [10][10]int {
+	var result [10][10]int
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			b.Data[i][j] = x.Data[i][j] + y.Data[i][j]
+			result[i][j] = x[i][j] + y[i][j]
 		}
 	}
+	return result
 }
 
 func (b BlockBox) foundNCrossData(x int, y int) [4]int {
@@ -140,4 +158,104 @@ func (b BlockBox) foundNCrossData(x int, y int) [4]int {
 		result[3] = b.Data[x][y+1]
 	}
 	return result
+}
+
+func (b BlockBox) foundNCrossMask(x int, y int, cross [4]int) [4]int {
+	var result [4]int
+	point := b.Data[x][y]
+
+	for i := range cross {
+		if point == cross[i] {
+			result[i] = 1
+		}
+	}
+	return result
+}
+
+func (b *BlockBox) SetNCrossMask(x int, y int, mask [4]int, value int) {
+	b.Mask[x][y] = value
+	if mask[0] != 0 {
+		b.Mask[x-1][y] = value
+	}
+	if mask[1] != 0 {
+		b.Mask[x+1][y] = value
+	}
+	if mask[2] != 0 {
+		b.Mask[x][y-1] = value
+	}
+	if mask[3] != 0 {
+		b.Mask[x][y+1] = value
+	}
+}
+
+func (b *BlockBox) checkNCrossMask(x int, y int, mask [4]int) {
+	index := 0
+	if mask[0] != 0 {
+		if b.Mask[x-1][y] != 0 {
+			index = b.Mask[x-1][y]
+		}
+	}
+	if index == 0 {
+		if mask[1] != 0 {
+			if b.Mask[x+1][y] != 0 {
+				index = b.Mask[x+1][y]
+			}
+		}
+	}
+
+	if index == 0 {
+		if mask[2] != 0 {
+			if b.Mask[x][y-1] != 0 {
+				index = b.Mask[x][y-1]
+			}
+		}
+	}
+
+	if index == 0 {
+		if mask[3] != 0 {
+			if b.Mask[x][y+1] != 0 {
+				index = b.Mask[x][y+1]
+			}
+		}
+	}
+
+	if index == 0 {
+		b.Flag++
+		b.SetNCrossMask(x, y, mask, b.Flag)
+	} else {
+		b.SetNCrossMask(x, y, mask, index)
+	}
+}
+
+func (b *BlockBox) checkNCrossData(x, y int) bool {
+
+	point := b.Data[x][y]
+	if point == 0 {
+		return false
+	}
+	crossData := b.foundNCrossData(x, y)
+
+	bSingle := (point != crossData[0]) && (point != crossData[1]) && (point != crossData[2]) && (point != crossData[3])
+	if bSingle {
+		return false
+	}
+
+	maskData := b.foundNCrossMask(x, y, crossData)
+	//	fmt.Printf("p(%d,%d)=%d cross=%v mask=%v\n", x, y, point, crossData, maskData)
+	b.checkNCrossMask(x, y, maskData)
+
+	return true
+}
+
+func (b *BlockBox) Adjoin() {
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			bAdjoin := b.checkNCrossData(i, j)
+			if !bAdjoin {
+				continue
+			}
+			//p := b.Mask[i][j]
+		}
+	}
+
 }

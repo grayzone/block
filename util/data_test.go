@@ -61,6 +61,5 @@ func TestAdjoinData(t *testing.T) {
 		result := AdjoinData(result2)
 
 		beego.Debug(result)
-
 	}
 }
