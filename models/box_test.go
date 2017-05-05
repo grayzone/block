@@ -21,18 +21,6 @@ func TestBlockBoxDown(t *testing.T) {
 	b.Print()
 }
 
-func TestBlockBoxSum(t *testing.T) {
-	var b BlockBox
-	var x BlockBox
-	x.Seed()
-	x.Print()
-	var y BlockBox
-	y.Seed()
-	y.Print()
-	b.Data = BlockBoxSum(x.Data, y.Data)
-	b.Print()
-}
-
 func TestBlockBoxLeft(t *testing.T) {
 	var b BlockBox
 	b.TestData()
@@ -49,12 +37,33 @@ func TestBlockBoxFormat(t *testing.T) {
 	b.Print()
 }
 
-func TestBlockBoxAdjoin(t *testing.T) {
+func TestBlockBoxGroupPoint01(t *testing.T) {
 	var b BlockBox
 	b.Seed()
 	b.Print()
-	b.Format()
-	b.Adjoin()
+	b.GroupPoint()
+	b.Print()
+	for i := 1; i < b.Flag+1; i++ {
+		group := b.FoundGroupBlock(i)
+		t.Logf("(%d):%v\n", i, group)
+	}
+}
+
+func TestBlockBoxGroupPoint02(t *testing.T) {
+	var b BlockBox
+	b.Data = [10][10]int{
+		{2, 1, 4, 0, 0, 0, 0, 0, 0, 0},
+		{1, 2, 1, 3, 0, 0, 0, 0, 0, 0},
+		{1, 5, 2, 1, 2, 1, 0, 0, 0, 0},
+		{5, 3, 1, 4, 5, 2, 0, 0, 0, 0},
+		{1, 5, 4, 2, 4, 0, 0, 0, 0, 0},
+		{1, 2, 2, 2, 0, 0, 0, 0, 0, 0},
+		{5, 3, 3, 5, 3, 5, 0, 0, 0, 0},
+		{4, 4, 1, 2, 1, 2, 2, 5, 0, 0},
+		{4, 4, 2, 4, 3, 2, 5, 5, 3, 2},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}
+	b.Print()
+	b.GroupPoint()
 	b.Print()
 	for i := 1; i < b.Flag+1; i++ {
 		group := b.FoundGroupBlock(i)
@@ -66,23 +75,19 @@ func TestRemoveGroupBlock(t *testing.T) {
 	var b BlockBox
 	b.Seed()
 	b.Print()
-	b.Format()
-	b.Adjoin()
+	b.GroupPoint()
 
 	for i := 1; i < b.Flag+1; i++ {
-		var result BlockBox
-		result.Data = b.RemoveGroupBlock(i)
-		result.Format()
-		result.Adjoin()
-		result.Print()
+		b.RemoveGroupBlock(i)
+		b.GroupPoint()
+		b.Print()
 	}
 }
 
 func TestAutoPlay(t *testing.T) {
 	var b BlockBox
 	b.Seed()
-	b.Format()
-	b.Adjoin()
+	b.GroupPoint()
 	b.Print()
 	count := 0
 	for b.Flag > 0 {
@@ -91,11 +96,7 @@ func TestAutoPlay(t *testing.T) {
 		index := r1.Intn(b.Flag) + 1
 		fmt.Printf("index:%d, count:%d\n", index, count)
 		count++
-		var result BlockBox
-		result.Data = b.RemoveGroupBlock(index)
-		result.Format()
-		result.Adjoin()
-
+		result := b.OneRound(index)
 		result.Print()
 		b = result
 	}
