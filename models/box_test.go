@@ -106,17 +106,34 @@ func TestRandomPlay(t *testing.T) {
 	}
 }
 
-func testAutoPlay(t *testing.T) {
+func TestAutoPlay(t *testing.T) {
 	var b BlockBox
 	b.TestData2()
 	b.GroupPoint()
 	b.Print()
 
-	//	var flaglist []int
-	g := b.Step()
-	for i := 0; i < 100; i++ {
-		for _, v := range g {
-			v.Step()
-		}
+	x := b.Step()
+	for i := range x {
+		go func(int) {
+			y := x[i].Step()
+			for j := range y {
+				go func(int) {
+					z := y[j].Step()
+					for k := range z {
+						go func(int) {
+							z1 := z[k].Step()
+							for k1 := range z1 {
+								z1[k1].Print()
+							}
+						}(k)
+						z[k].Print()
+					}
+					y[j].Print()
+				}(j)
+			}
+		}(i)
+		x[i].Print()
 	}
+
+	//	b.Print()
 }

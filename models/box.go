@@ -14,13 +14,16 @@ type Point struct {
 }
 
 type BlockBox struct {
-	Data   [10][10]int
-	Mask   [10][10]int
-	Status [10][10]int
-	Flag   int
+	Data      [10][10]int
+	Mask      [10][10]int
+	Status    [10][10]int
+	Flag      int
+	FlagList  []int
+	IsClicked bool
 }
 
 func (b BlockBox) Print() {
+	fmt.Printf("flag:%d, flag list:%v, is clicked : %v\n", b.Flag, b.FlagList, b.IsClicked)
 	fmt.Println("-------------Data------------- | --------------Mask------------ | --------------Status------------")
 	fmt.Println("|01|02|03|04|05|06|07|08|09|10 @ |01|02|03|04|05|06|07|08|09|10|@ |01|02|03|04|05|06|07|08|09|10|")
 	fmt.Println("-------------------------------------------------------------------------------------------------")
@@ -304,23 +307,26 @@ func (b BlockBox) OneClick(index int) BlockBox {
 	return result
 }
 
-func (b BlockBox) Step() []BlockBox {
+func (b *BlockBox) Step() []BlockBox {
 	var result []BlockBox
 	b.GroupPoint()
 	for i := 1; i < b.Flag+1; i++ {
-		s := b
+		s := *b
 		s.RemoveGroupBlock(i)
 		s.Format()
 		s.GroupPoint()
+		s.FlagList = append(s.FlagList, i)
 		result = append(result, s)
 	}
+	b.IsClicked = true
 	return result
 }
 
 func (b *BlockBox) Remove(x, y int) {
 	b.GroupPoint()
-	b.Print()
-	fmt.Printf("x:%d,y:%d,mask index:%d\n", x, y, b.Mask[x][y])
-	b.RemoveGroupBlock(b.Mask[x][y])
+	//	fmt.Printf("x:%d,y:%d,mask index:%d\n", x, y, b.Mask[x][y])
+	index := b.Mask[x][y]
+	b.RemoveGroupBlock(index)
 	b.Format()
+	b.Print()
 }
