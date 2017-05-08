@@ -23,7 +23,7 @@ func (c *MainController) New() {
 
 func (c *MainController) Test() {
 	var result models.BlockBox
-	result.TestData()
+	result.TestData2()
 	c.Data["json"] = &result.Data
 	c.ServeJSON()
 }
@@ -35,5 +35,26 @@ func (c *MainController) Drop() {
 	result.Format()
 
 	c.Data["json"] = &result.Data
+	c.ServeJSON()
+}
+
+func (c *MainController) Step() {
+	s := c.GetString("data")
+	var input models.BlockBox
+	input.Parse(s)
+	result := input.Step()
+
+	c.Data["json"] = &result
+	c.ServeJSON()
+}
+
+func (c *MainController) Remove() {
+	x, _ := c.GetInt("x")
+	y, _ := c.GetInt("y")
+	s := c.GetString("data")
+	var result models.BlockBox
+	result.Parse(s)
+	result.Remove(x, y)
+	c.Data["json"] = &result
 	c.ServeJSON()
 }

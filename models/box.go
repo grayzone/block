@@ -21,9 +21,9 @@ type BlockBox struct {
 }
 
 func (b BlockBox) Print() {
-	fmt.Println("-------------Data------------- | --------------Mask------------|--------------Status------------")
-	fmt.Println("|01|02|03|04|05|06|07|08|09|10 @ |01|02|03|04|05|06|07|08|09|10|")
-	fmt.Println("---------------------------------------------------------------")
+	fmt.Println("-------------Data------------- | --------------Mask------------ | --------------Status------------")
+	fmt.Println("|01|02|03|04|05|06|07|08|09|10 @ |01|02|03|04|05|06|07|08|09|10|@ |01|02|03|04|05|06|07|08|09|10|")
+	fmt.Println("-------------------------------------------------------------------------------------------------")
 	for i := 0; i < 10; i++ {
 		for j := 10; j > 0; j-- {
 			if b.Data[10-j][10-i-1] != 0 {
@@ -76,7 +76,16 @@ func (b *BlockBox) TestData() {
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{1, 2, 3, 4, 5, 0, 0, 0, 0, 0}}
+}
 
+func (b *BlockBox) TestData2() {
+	s1 := rand.NewSource(99)
+	r1 := rand.New(s1)
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			b.Data[i][j] = r1.Intn(5) + 1
+		}
+	}
 }
 
 func (b *BlockBox) Parse(s string) {
@@ -276,6 +285,9 @@ func (b BlockBox) FoundGroupBlock(index int) []Point {
 }
 
 func (b *BlockBox) RemoveGroupBlock(index int) {
+	if index == 0 {
+		return
+	}
 	group := b.FoundGroupBlock(index)
 	for i := range group {
 		p := group[i]
@@ -283,7 +295,7 @@ func (b *BlockBox) RemoveGroupBlock(index int) {
 	}
 }
 
-func (b BlockBox) OneRound(index int) BlockBox {
+func (b BlockBox) OneClick(index int) BlockBox {
 	var result BlockBox
 	result.Data = b.Data
 	result.GroupPoint()
@@ -292,16 +304,23 @@ func (b BlockBox) OneRound(index int) BlockBox {
 	return result
 }
 
-func (b BlockBox) AutoPlay() {
+func (b BlockBox) Step() []BlockBox {
+	var result []BlockBox
 	b.GroupPoint()
-	for b.Flag > 0 {
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		index := r1.Intn(b.Flag) + 1
-		fmt.Println("index:", index)
-		b.RemoveGroupBlock(index)
-		b.GroupPoint()
-
-		b.Print()
+	for i := 1; i < b.Flag+1; i++ {
+		s := b
+		s.RemoveGroupBlock(i)
+		s.Format()
+		s.GroupPoint()
+		result = append(result, s)
 	}
+	return result
+}
+
+func (b *BlockBox) Remove(x, y int) {
+	b.GroupPoint()
+	b.Print()
+	fmt.Printf("x:%d,y:%d,mask index:%d\n", x, y, b.Mask[x][y])
+	b.RemoveGroupBlock(b.Mask[x][y])
+	b.Format()
 }

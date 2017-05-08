@@ -84,20 +84,39 @@ func TestRemoveGroupBlock(t *testing.T) {
 	}
 }
 
-func TestAutoPlay(t *testing.T) {
+func TestRandomPlay(t *testing.T) {
 	var b BlockBox
 	b.Seed()
 	b.GroupPoint()
 	b.Print()
 	count := 0
-	for b.Flag > 0 {
+	flag := b.Flag
+	for flag > 0 {
 		s1 := rand.NewSource(time.Now().UnixNano())
 		r1 := rand.New(s1)
-		index := r1.Intn(b.Flag) + 1
-		fmt.Printf("index:%d, count:%d\n", index, count)
+		index := r1.Intn(flag) + 1
+		result := b.OneClick(index)
+		flag = result.Flag
 		count++
-		result := b.OneRound(index)
+		fmt.Printf("index:%d, count:%d flag:%d\n", index, count, flag)
 		result.Print()
-		b = result
+		b.Data = result.Data
+		b.Mask = [10][10]int{}
+		b.Status = [10][10]int{}
+	}
+}
+
+func testAutoPlay(t *testing.T) {
+	var b BlockBox
+	b.TestData2()
+	b.GroupPoint()
+	b.Print()
+
+	//	var flaglist []int
+	g := b.Step()
+	for i := 0; i < 100; i++ {
+		for _, v := range g {
+			v.Step()
+		}
 	}
 }
