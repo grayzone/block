@@ -54,7 +54,9 @@ func (b BlockBox) Print() {
 		}
 		fmt.Println()
 	}
-
+}
+func (b BlockBox) PrintFlag() {
+	fmt.Printf("flag:%d, flag list:%v, is clicked : %v\n", b.Flag, b.FlagList, b.IsClicked)
 }
 
 func (b *BlockBox) Seed() {

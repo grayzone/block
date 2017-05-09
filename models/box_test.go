@@ -112,28 +112,26 @@ func TestAutoPlay(t *testing.T) {
 	b.GroupPoint()
 	b.Print()
 
-	x := b.Step()
-	for i := range x {
-		go func(int) {
-			y := x[i].Step()
-			for j := range y {
-				go func(int) {
-					z := y[j].Step()
-					for k := range z {
-						go func(int) {
-							z1 := z[k].Step()
-							for k1 := range z1 {
-								z1[k1].Print()
-							}
-						}(k)
-						z[k].Print()
-					}
-					y[j].Print()
-				}(j)
-			}
-		}(i)
-		x[i].Print()
-	}
+	// 1
+	x1 := b.Step()
+	for i1 := range x1 {
+		// 2
+		x2 := x1[i1].Step()
+		for i2 := range x2 {
+			// 3
+			x3 := x2[i2].Step()
+			for i3 := range x3 {
+				// 4
+				x4 := x3[i3].Step()
+				for i4 := range x4 {
 
-	//	b.Print()
+					//	x5 := x4[i4].Step()
+					x4[i4].PrintFlag()
+
+				}
+			}
+			//	y[j].PrintFlag()
+		}
+		//	x[i].PrintFlag()
+	}
 }
