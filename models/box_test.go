@@ -17,7 +17,7 @@ func TestBlockBoxDown(t *testing.T) {
 	var b BlockBox
 	b.TestData()
 	b.Print()
-	b.Down()
+	b.down()
 	b.Print()
 }
 
@@ -25,7 +25,7 @@ func TestBlockBoxLeft(t *testing.T) {
 	var b BlockBox
 	b.TestData()
 	b.Print()
-	b.Left()
+	b.left()
 	b.Print()
 }
 
@@ -44,7 +44,7 @@ func TestBlockBoxGroupPoint01(t *testing.T) {
 	b.GroupPoint()
 	b.Print()
 	for i := 1; i < b.Flag+1; i++ {
-		group := b.FoundGroupBlock(i)
+		group := b.findGroupBlock(i)
 		t.Logf("(%d):%v\n", i, group)
 	}
 }
@@ -66,7 +66,7 @@ func TestBlockBoxGroupPoint02(t *testing.T) {
 	b.GroupPoint()
 	b.Print()
 	for i := 1; i < b.Flag+1; i++ {
-		group := b.FoundGroupBlock(i)
+		group := b.findGroupBlock(i)
 		t.Logf("(%d):%v\n", i, group)
 	}
 }
@@ -134,4 +134,14 @@ func TestAutoPlay(t *testing.T) {
 		}
 		//	x[i].PrintFlag()
 	}
+}
+
+func TestFindButtonGroupIndex(t *testing.T) {
+	var b BlockBox
+	b.TestData2()
+	b.GroupPoint()
+	b.Print()
+	x := b.FindButtonGroupIndex()
+	fmt.Println(x)
+
 }

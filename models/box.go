@@ -14,16 +14,17 @@ type Point struct {
 }
 
 type BlockBox struct {
-	Data      [10][10]int
-	Mask      [10][10]int
-	Status    [10][10]int
-	Flag      int
-	FlagList  []int
-	IsClicked bool
+	Data        [10][10]int
+	Mask        [10][10]int
+	Status      [10][10]int
+	Flag        int
+	FlagList    []int
+	MaxFlagList []int
+	IsClicked   bool
 }
 
 func (b BlockBox) Print() {
-	fmt.Printf("flag:%d, flag list:%v, is clicked : %v\n", b.Flag, b.FlagList, b.IsClicked)
+	b.PrintFlag()
 	fmt.Println("-------------Data------------- | --------------Mask------------ | --------------Status------------")
 	fmt.Println("|01|02|03|04|05|06|07|08|09|10 @ |01|02|03|04|05|06|07|08|09|10|@ |01|02|03|04|05|06|07|08|09|10|")
 	fmt.Println("-------------------------------------------------------------------------------------------------")
@@ -56,7 +57,7 @@ func (b BlockBox) Print() {
 	}
 }
 func (b BlockBox) PrintFlag() {
-	fmt.Printf("flag:%d, flag list:%v, is clicked : %v\n", b.Flag, b.FlagList, b.IsClicked)
+	fmt.Printf("flag:%d, flag list:%v, max flag list:%v, is clicked : %v\n", b.Flag, b.FlagList, b.MaxFlagList, b.IsClicked)
 }
 
 func (b *BlockBox) Seed() {
@@ -106,7 +107,7 @@ func (b *BlockBox) Parse(s string) {
 	}
 }
 
-func (b *BlockBox) Down() {
+func (b *BlockBox) down() {
 	var tmp [10][10]int
 	for i := 0; i < 10; i++ {
 		noZero := 0
@@ -133,7 +134,7 @@ func isEmptyArray(a [10]int) bool {
 	return false
 }
 
-func (b *BlockBox) Left() {
+func (b *BlockBox) left() {
 	var tmp [10][10]int
 	index := 0
 	for i := 0; i < 10; i++ {
@@ -148,17 +149,17 @@ func (b *BlockBox) Left() {
 }
 
 func (b *BlockBox) Format() {
-	b.Down()
-	b.Left()
+	b.down()
+	b.left()
 }
 
-func (b *BlockBox) foundPointGroup(x, y int) []Point {
+func (b *BlockBox) findPointGroup(x, y int) []Point {
 	var result []Point
 	point := b.Data[x][y]
 	if point == 0 {
 		return result
 	}
-	cross := b.foundNCrossData(x, y)
+	cross := b.findNCrossData(x, y)
 	bSingle := (point != cross[0]) && (point != cross[1]) && (point != cross[2]) && (point != cross[3])
 	if bSingle {
 		return result
@@ -167,7 +168,7 @@ func (b *BlockBox) foundPointGroup(x, y int) []Point {
 		if b.Status[x-1][y] == 0 {
 			result = append(result, Point{X: x - 1, Y: y})
 			b.Status[x-1][y]++
-			ps := b.foundPointGroup(x-1, y)
+			ps := b.findPointGroup(x-1, y)
 			if len(ps) > 0 {
 				result = append(result, ps...)
 			}
@@ -178,7 +179,7 @@ func (b *BlockBox) foundPointGroup(x, y int) []Point {
 		if b.Status[x+1][y] == 0 {
 			result = append(result, Point{X: x + 1, Y: y})
 			b.Status[x+1][y]++
-			ps := b.foundPointGroup(x+1, y)
+			ps := b.findPointGroup(x+1, y)
 			if len(ps) > 0 {
 				result = append(result, ps...)
 			}
@@ -188,7 +189,7 @@ func (b *BlockBox) foundPointGroup(x, y int) []Point {
 		if b.Status[x][y-1] == 0 {
 			result = append(result, Point{X: x, Y: y - 1})
 			b.Status[x][y-1]++
-			ps := b.foundPointGroup(x, y-1)
+			ps := b.findPointGroup(x, y-1)
 			if len(ps) > 0 {
 				result = append(result, ps...)
 			}
@@ -200,7 +201,7 @@ func (b *BlockBox) foundPointGroup(x, y int) []Point {
 		if b.Status[x][y+1] == 0 {
 			result = append(result, Point{X: x, Y: y + 1})
 			b.Status[x][y+1]++
-			ps := b.foundPointGroup(x, y+1)
+			ps := b.findPointGroup(x, y+1)
 			if len(ps) > 0 {
 				result = append(result, ps...)
 			}
@@ -210,8 +211,8 @@ func (b *BlockBox) foundPointGroup(x, y int) []Point {
 	return result
 }
 
-func (b *BlockBox) SetPointGroupMask(x, y int) {
-	ps := b.foundPointGroup(x, y)
+func (b *BlockBox) setPointGroupMask(x, y int) {
+	ps := b.findPointGroup(x, y)
 	//	fmt.Printf("x:%d,y:%d,group:%d\n", x, y, ps)
 	if len(ps) == 0 {
 		return
@@ -234,7 +235,7 @@ func (b *BlockBox) SetPointGroupMask(x, y int) {
 	}
 }
 
-func (b BlockBox) foundNCrossData(x int, y int) [4]int {
+func (b BlockBox) findNCrossData(x int, y int) [4]int {
 	var result [4]int
 	if x == 0 {
 		result[0] = -1
@@ -267,13 +268,12 @@ func (b *BlockBox) GroupPoint() {
 	b.Format()
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
-			b.SetPointGroupMask(i, j)
+			b.setPointGroupMask(i, j)
 		}
 	}
-
 }
 
-func (b BlockBox) FoundGroupBlock(index int) []Point {
+func (b BlockBox) findGroupBlock(index int) []Point {
 	var result []Point
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 10; j++ {
@@ -289,11 +289,25 @@ func (b BlockBox) FoundGroupBlock(index int) []Point {
 	return result
 }
 
+func (b BlockBox) FindButtonGroupIndex() []int {
+	var result []int
+	for i := 1; i < b.Flag+1; i++ {
+		points := b.findGroupBlock(i)
+		for _, p := range points {
+			if p.Y < 5 {
+				result = append(result, i)
+				break
+			}
+		}
+	}
+	return result
+}
+
 func (b *BlockBox) RemoveGroupBlock(index int) {
 	if index == 0 {
 		return
 	}
-	group := b.FoundGroupBlock(index)
+	group := b.findGroupBlock(index)
 	for i := range group {
 		p := group[i]
 		b.Data[p.X][p.Y] = 0
@@ -301,11 +315,15 @@ func (b *BlockBox) RemoveGroupBlock(index int) {
 }
 
 func (b BlockBox) OneClick(index int) BlockBox {
+	b.RemoveGroupBlock(index)
+	b.Format()
+	b.FlagList = append(b.FlagList, index)
+	b.MaxFlagList = append(b.MaxFlagList, b.Flag)
 	var result BlockBox
 	result.Data = b.Data
+	result.FlagList = b.FlagList
+	result.MaxFlagList = b.MaxFlagList
 	result.GroupPoint()
-	result.RemoveGroupBlock(index)
-	result.Format()
 	return result
 }
 
